@@ -13,7 +13,8 @@ gem "sqlite3", "~> 1.4"
 gem "puma", "~> 5.0"
 
 # Use Firebase Ruby
-gem 'firebase', '~> 0.2.6'
+gem 'google-cloud-firestore', '~> 2.9', '>= 2.9.1'
+
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
 

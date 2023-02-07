@@ -3,13 +3,17 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "articles#index"
-  get "/coba/:id", to: "coba#show"
-  get "/coba", to: "coba#index"
-  get "/:name", to: "coba#aneh"
   
   namespace :api do
     namespace :v1 do
       resources :chats
     end
   end
+
+  namespace :api do
+    namespace :v1 do
+      resources :users
+    end
+  end
+
 end

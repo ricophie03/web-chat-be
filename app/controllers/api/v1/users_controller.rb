@@ -1,6 +1,6 @@
 module Api
     module V1
-        class ChatsController < ApplicationController
+        class UsersController < ApplicationController
             require "google/cloud/firestore"
             def index
                 render json: {
@@ -21,33 +21,35 @@ module Api
                     credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
                 )
 
-                time = DateTime.parse(params[:time])
                 # Get a collection reference
-                messages_col = firestore.col "messages"
+                messages_col = firestore.col "users"
 
                 # Get a document reference with data
                 random_ref = messages_col.add({ 
-                    message_text: params[:message_text],
+                    photo_url: params[:photo_url],
                     username: params[:username],
-                    time: time
                 })
-
-                if random_ref.document_id
-                render json: {
-                    "success" => true,
-                    "id" => random_ref.document_id
-                }
-                else
-                render json: {
-                        "success" => false,
-                }   
-                end
             end
 
             def update
+                firestore = Google::Cloud::Firestore.new(
+                    project_id: "simpe-web-chat",
+                    credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
+                )
+
+                # Get a document reference
+                user_ref = firestore.doc "users/#{params[:id]}"
+
+                if  params[:username] && params[:photo_url]
+                    user_ref.set({ username: params[:username],photo_url: params[:photo_url] }, merge: true)
+                elsif params[:username]
+                    user_ref.set({ username: params[:username]}, merge: true)
+                else
+                    user_ref.set({ photo_url: params[:photo_url] }, merge: true)
+                end
+
                 render json: {
-                    "message_text" => "#{params[:message_text]}",
-                    "time" => "#{params[:time]}",
+                    "photo_url" => "#{params[:photo_url]}",
                     "username" => "#{params[:username]}",
                     "id" => "#{params[:id]}"
                 }
@@ -60,8 +62,8 @@ module Api
                 )
 
                 # Get a document reference
-                chat_ref = firestore.doc "messages/#{params[:id]}"
-                chat_ref.delete
+                user_ref = firestore.doc "users/#{params[:id]}"
+                user_ref.delete
 
                 render json: {
                     "success" => true,

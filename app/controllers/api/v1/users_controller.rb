@@ -33,17 +33,16 @@ module Api
             end
 
             def create
-                if params[:image_path] #if photo uploaded
+                if params[:image_name] #if photo uploaded
                     storage  = Google::Cloud::Storage.new(
                         project_id: "simpe-web-chat",
                         credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
                     )
     
-                    puts "ini directory sekarang : #{__dir__}"
                     # Get a bucket reference
                     bucket = storage.bucket "simpe-web-chat.appspot.com"
                     file = bucket.create_file "C:\\Pictures\\#{params[:image_name]}",
-                    "#{params[:username]}_#{params[:image_path]}"
+                    "images/#{params[:username]}_#{params[:image_name]}"
     
                     if file.url
                         firestore = Google::Cloud::Firestore.new(

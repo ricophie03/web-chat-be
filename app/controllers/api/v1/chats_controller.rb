@@ -18,7 +18,7 @@ module Api
             def create
                 firestore = Google::Cloud::Firestore.new(
                     project_id: "simpe-web-chat",
-                    credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
+                    credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
                 )
 
                 time = DateTime.parse(params[:time])
@@ -56,7 +56,7 @@ module Api
             def destroy
                 firestore = Google::Cloud::Firestore.new(
                     project_id: "simpe-web-chat",
-                    credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
+                    credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
                 )
 
                 # Get a document reference

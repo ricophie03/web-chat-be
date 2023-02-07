@@ -2,39 +2,109 @@ module Api
     module V1
         class UsersController < ApplicationController
             require "google/cloud/firestore"
+            require "google/cloud/storage"
+
             def index
+                storage  = Google::Cloud::Storage.new(
+                    project_id: "simpe-web-chat",
+                    credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
+                )
+
+                # # Get a bucket reference
+                # bucket = storage.bucket "simpe-web-chat.appspot.com"
+                # file = bucket.file "images/1.png"
+
                 render json: {
                     "connected" => "success"
+                    # "bucket" => file.public_url
                 }
             end
 
             def show
+                storage  = Google::Cloud::Storage.new(
+                    project_id: "simpe-web-chat",
+                    credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
+                )
+
                 render json: {
                     "berhasil" => "success",
-                    "id" => "#{params[:id]}"
+                    "id" => "#{params[:id]}",
                 }
             end
 
             def create
-                firestore = Google::Cloud::Firestore.new(
-                    project_id: "simpe-web-chat",
-                    credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
-                )
+                if params[:image_path] #if photo uploaded
+                    storage  = Google::Cloud::Storage.new(
+                        project_id: "simpe-web-chat",
+                        credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
+                    )
+    
+                    puts "ini directory sekarang : #{__dir__}"
+                    # Get a bucket reference
+                    bucket = storage.bucket "simpe-web-chat.appspot.com"
+                    file = bucket.create_file "C:\\Pictures\\#{params[:image_name]}",
+                    "#{params[:username]}_#{params[:image_path]}"
+    
+                    if file.url
+                        firestore = Google::Cloud::Firestore.new(
+                            project_id: "simpe-web-chat",
+                            credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
+                        )
+    
+                        # Get a collection reference
+                        users_col = firestore.col "users"
+    
+                        # Get a document reference with data
+                        random_ref = users_col.add({ 
+                            photo_url: file.url,
+                            username: params[:username]
+                        })
+    
+                        render json: {
+                            "image_url" => file.url,
+                            "username" => params[:username],
+                            "id" => random_ref.document_id,
+                            "success" => true
+                        }
+                    else
+                        render json: {
+                            "success" => false
+                        }
+                    end
+                else #if photo is empty
+                    firestore = Google::Cloud::Firestore.new(
+                        project_id: "simpe-web-chat",
+                        credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
+                    )
 
-                # Get a collection reference
-                messages_col = firestore.col "users"
+                    # Get a collection reference
+                    users_col = firestore.col "users"
 
-                # Get a document reference with data
-                random_ref = messages_col.add({ 
-                    photo_url: params[:photo_url],
-                    username: params[:username],
-                })
+                    # Get a document reference with data
+                    random_ref = users_col.add({ 
+                        photo_url: "",
+                        username: params[:username]
+                    })
+
+                    if random_ref.document_id
+                        render json: {
+                            "image_url" => "",
+                            "username" => params[:username],
+                            "id" => random_ref.document_id,
+                            "success" => true
+                        }
+                    else
+                        render json: {
+                            "success" => false
+                        }
+                    end
+                end
             end
 
             def update
-                firestore = Google::Cloud::Firestore.new(
+                storage = Google::Cloud::Storage.new.new(
                     project_id: "simpe-web-chat",
-                    credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
+                    credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
                 )
 
                 # Get a document reference
@@ -56,9 +126,9 @@ module Api
             end
 
             def destroy
-                firestore = Google::Cloud::Firestore.new(
+                storage = Google::Cloud::Storage.new.new(
                     project_id: "simpe-web-chat",
-                    credentials: 'D:\web-chat-be\simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json'
+                    credentials: "#{File.expand_path("#{__dir__}/../../../../")}/simpe-web-chat-firebase-adminsdk-kmipu-6af2cbce99.json"
                 )
 
                 # Get a document reference
@@ -70,7 +140,6 @@ module Api
                     "id" => "#{params[:id]}"
                 }
             end
-
         end
     end
 end
